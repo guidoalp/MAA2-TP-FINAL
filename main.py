@@ -1,11 +1,12 @@
 import librosa
 from src.filters import lowpass_fir, highpass_fir, apply_filter
 from src.analysis import calculate_fft
-from src.visualization import (plot_audio_effects_comparison, plot_waveform, plot_comparison, plot_filters_comparison)
+from src.visualization import (plot_audio_effects_comparison, plot_spectrograms_comparison, plot_waveform, plot_filters_comparison)
+from src.analysis import compute_spectrogram
 
 # Configuración
 AUDIO_PATH = 'audio_samples/sample-15s.wav'
-CUTOFF_FREQ = 1000  # Hz
+CUTOFF_FREQ = 3000  # Hz
 NUM_TAPS = 101
 
 # Cargar audio
@@ -42,4 +43,12 @@ _, _, mag_high_db = calculate_fft(y_highpass, sr)
 plot_audio_effects_comparison(freqs_orig, mag_orig_db, mag_low_db, 
                               mag_high_db, fc=CUTOFF_FREQ)
 
-print("\n✓ Análisis completado")
+# STFT - Espectrogramas
+print("\nCalculando espectrogramas...")
+
+times, freqs_spec, _, Sxx_orig_db = compute_spectrogram(y, sr)
+_, _, _, Sxx_low_db = compute_spectrogram(y_lowpass, sr)
+_, _, _, Sxx_high_db = compute_spectrogram(y_highpass, sr)
+
+plot_spectrograms_comparison(times, freqs_spec, Sxx_orig_db, Sxx_low_db,
+                            Sxx_high_db, fc=CUTOFF_FREQ)

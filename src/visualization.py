@@ -20,10 +20,10 @@ def plot_spectrum(frequencies, magnitude_db, fc=None, f_max=10000, title="Espect
     
     Parámetros:
     -----------
-    frequencies (ndarray): Array de frecuencias
-    magnitude_db (ndarray): Magnitud en dB
-    fc (float) (opcional): Frecuencia de corte para la marca
-    f_max (float): Frecuencia máxima a mostrar
+    - frequencies (ndarray): Array de frecuencias
+    - magnitude_db (ndarray): Magnitud en dB
+    - fc (float, opcional): Frecuencia de corte para la marca
+    - f_max (float): Frecuencia máxima a mostrar
     """
     idx_max = np.where(frequencies >= f_max)[0][0]
     
@@ -47,13 +47,13 @@ def plot_comparison(frequencies, mag_original_db, mag_filtered_db, fc, f_max=500
     """
     Grafica comparación espectral y diferencia entre señales.
     
-    Parametros:
+    Parámetros:
     -----------
-    frequencies (ndarray): Array de frecuencias
-    mag_original_db (ndarray): Magnitud original en dB
-    mag_filtered_db (ndarray): Magnitud filtrada en dB
-    fc (float): Frecuencia de corte
-    f_max: (float): Frecuencia máxima a mostrar
+    - frequencies (ndarray): Array de frecuencias
+    - mag_original_db (ndarray): Magnitud original en dB
+    - mag_filtered_db (ndarray): Magnitud filtrada en dB
+    - fc (float): Frecuencia de corte
+    - f_max (float): Frecuencia máxima a mostrar
     """
     idx_max = np.where(frequencies >= f_max)[0][0]
     
@@ -96,10 +96,10 @@ def plot_filter_response(frequencies, magnitude_db, fc, f_max=5000):
     
     Parámetros:
     -----------
-    frequencies (ndarray): Array de frecuencias
-    magnitude_db (ndarray): Respuesta en magnitud (dB)
-    fc (float): Frecuencia de corte
-    f_max (float): Frecuencia máxima a mostrar
+    - frequencies (ndarray): Array de frecuencias
+    - magnitude_db (ndarray): Respuesta en magnitud (dB)
+    - fc (float): Frecuencia de corte
+    - f_max (float): Frecuencia máxima a mostrar
     """
     idx_max = np.where(frequencies >= f_max)[0][0]
     
@@ -151,8 +151,15 @@ def plot_impulse_response(filter_coeffs, title="Respuesta al impulso"):
 
 def plot_filters_comparison(h_low, h_high, fc, sr):
     """
-    Compara filtros paso bajo y paso alto en una sola figura
-    Muestra respuestas al impulso y respuestas en frecuencia
+    Compara filtros paso bajo y paso alto en una sola figura.
+    Muestra respuestas al impulso y respuestas en frecuencia.
+
+    Parámetros:
+    -----------
+    - h_low (ndarray): Coeficientes del filtro paso bajo
+    - h_high (ndarray): Coeficientes del filtro paso alto
+    - fc (float): Frecuencia de corte en Hz
+    - sr (float): Frecuencia de muestreo en Hz
     """
     from .analysis import calculate_filter_response
     
@@ -214,6 +221,15 @@ def plot_audio_effects_comparison(freqs, mag_orig_db, mag_low_db, mag_high_db, f
     """
     Compara el efecto de ambos filtros en el audio en una sola figura.
     Muestra original vs ambos filtros en el mismo gráfico.
+
+    Parámetros:
+    -----------
+    - freqs (ndarray): Array de frecuencias
+    - mag_orig_db (ndarray): Magnitud original en dB
+    - mag_low_db (ndarray): Magnitud con filtro paso bajo en dB
+    - mag_high_db (ndarray): Magnitud con filtro paso alto en dB
+    - fc (float): Frecuencia de corte en Hz
+    - f_max (float): Frecuencia máxima a mostrar. Default: 5000
     """
     idx_max = np.where(freqs >= f_max)[0][0]
     
@@ -248,6 +264,90 @@ def plot_audio_effects_comparison(freqs, mag_orig_db, mag_low_db, mag_high_db, f
     axes[1].set_title('Diferencia espectral - Lo que cada filtro atenuó')
     axes[1].legend()
     axes[1].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.show()
+
+def plot_spectrogram(times, frequencies, Sxx_db, title="Espectrograma", f_max=10000):
+    """
+    Grafica un espectrograma.
+    
+    Parámetros:
+    -----------
+    - times (ndarray): Array de tiempos
+    - frequencies (ndarray): Array de frecuencias
+    - Sxx_db (ndarray): Espectrograma en dB
+    - title (str): Título del gráfico
+    - f_max (float): Frecuencia máxima a mostrar
+    """
+    # Limitar a f_max
+    idx_freq = np.where(frequencies <= f_max)[0]
+    
+    plt.figure(figsize=(14, 6))
+    plt.pcolormesh(times, frequencies[idx_freq], Sxx_db[idx_freq, :], 
+                   shading='gouraud', cmap='viridis')
+    plt.colorbar(label='Magnitud (dB)')
+    plt.ylabel('Frecuencia (Hz)')
+    plt.xlabel('Tiempo (s)')
+    plt.title(title)
+    plt.ylim(0, f_max)
+    plt.tight_layout()
+    plt.show()
+
+def plot_spectrograms_comparison(times, frequencies, Sxx_orig_db, Sxx_low_db, 
+                                 Sxx_high_db, fc, f_max=10000):
+    """
+    Compara espectrogramas de señal original y filtradas en una sola figura.
+    
+    Parámetros:
+    -----------
+    - times (ndarray): Array de tiempos
+    - frequencies (ndarray): Array de frecuencias
+    - Sxx_orig_db (ndarray): Espectrograma original en dB
+    - Sxx_low_db (ndarray): Espectrograma con filtro paso bajo en dB
+    - Sxx_high_db (ndarray): Espectrograma con filtro paso alto en dB
+    - fc (float): Frecuencia de corte
+    - f_max (float): Frecuencia máxima a mostrar
+    """
+    # Limitar a f_max
+    idx_freq = np.where(frequencies <= f_max)[0]
+    
+    fig, axes = plt.subplots(3, 1, figsize=(14, 12))
+    
+    # Encontrar rango común de colores para comparación justa
+    vmin = min(Sxx_orig_db.min(), Sxx_low_db.min(), Sxx_high_db.min())
+    vmax = max(Sxx_orig_db.max(), Sxx_low_db.max(), Sxx_high_db.max())
+    
+    # 1. Original
+    im1 = axes[0].pcolormesh(times, frequencies[idx_freq], Sxx_orig_db[idx_freq, :],
+                             shading='gouraud', cmap='viridis', vmin=vmin, vmax=vmax)
+    axes[0].set_ylabel('Frecuencia (Hz)')
+    axes[0].set_title('Espectrograma - Audio original')
+    axes[0].set_ylim(0, f_max)
+    fig.colorbar(im1, ax=axes[0], label='Magnitud (dB)')
+    
+    # 2. Paso bajo
+    im2 = axes[1].pcolormesh(times, frequencies[idx_freq], Sxx_low_db[idx_freq, :],
+                             shading='gouraud', cmap='viridis', vmin=vmin, vmax=vmax)
+    axes[1].axhline(y=fc, color='red', linestyle='--', linewidth=2, 
+                    label=f'Frecuencia de corte ({fc} Hz)', alpha=0.7)
+    axes[1].set_ylabel('Frecuencia (Hz)')
+    axes[1].set_title(f'Espectrograma - Filtro paso bajo (fc={fc} Hz)')
+    axes[1].set_ylim(0, f_max)
+    axes[1].legend(loc='upper right')
+    fig.colorbar(im2, ax=axes[1], label='Magnitud (dB)')
+    
+    # 3. Paso alto
+    im3 = axes[2].pcolormesh(times, frequencies[idx_freq], Sxx_high_db[idx_freq, :],
+                             shading='gouraud', cmap='viridis', vmin=vmin, vmax=vmax)
+    axes[2].axhline(y=fc, color='red', linestyle='--', linewidth=2,
+                    label=f'Frecuencia de corte ({fc} Hz)', alpha=0.7)
+    axes[2].set_xlabel('Tiempo (s)')
+    axes[2].set_ylabel('Frecuencia (Hz)')
+    axes[2].set_title(f'Espectrograma - Filtro paso alto (fc={fc} Hz)')
+    axes[2].set_ylim(0, f_max)
+    axes[2].legend(loc='upper right')
+    fig.colorbar(im3, ax=axes[2], label='Magnitud (dB)')
     
     plt.tight_layout()
     plt.show()
