@@ -79,6 +79,41 @@ def highpass_fir(fc, fs, num_taps=101, window_type='hamming'):
 
 	return h_high
 
+def bandpass_fir(fc_low, fc_high, fs, num_taps=101, window_type='hamming'):
+    """
+    Filtro FIR paso banda usando el método de ventana. Combina paso alto y paso bajo.
+    
+    Parámetros:
+    -----------
+    fc_low (float): Frecuencia de corte inferior en Hz
+    fc_high (float): Frecuencia de corte superior en Hz
+    fs (float): Frecuencia de muestreo en Hz
+    num_taps (int): Longitud del filtro (debe ser impar)
+    window_type (str): Tipo de ventana: 'hamming', 'blackman', 'hann', 'rectangular'
+    
+    Retorna:
+    --------
+    h (ndarray): Respuesta al impulso del filtro paso banda
+    """
+    # validación de parametros
+    if fc_low >= fc_high:
+        raise ValueError("fc_low debe ser menor que fc_high")
+    
+    if num_taps % 2 == 0:
+        num_taps += 1
+    
+    h_low = lowpass_fir(fc_high, fs, num_taps, window_type)
+    
+    h_high = highpass_fir(fc_low, fs, num_taps, window_type)
+    
+    # convolución de ambos filtros
+    h_bp = np.convolve(h_low, h_high, mode='same')
+    
+    # normalizar
+    h_bp = h_bp / np.sum(np.abs(h_bp))
+    
+    return h_bp
+
 def apply_filter(signal, filter_coeffs):
 	"""
 	Aplica un filtro FIR a una señal usando convolución
