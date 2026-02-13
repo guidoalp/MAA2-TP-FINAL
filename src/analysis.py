@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import signal as scipy_signal
 
 def calculate_fft(signal, sr):
     """
@@ -86,8 +87,6 @@ def compute_spectrogram(signal, sr, nperseg=2048, noverlap=None):
     - Sxx (ndarray): Espectrograma (magnitud al cuadrado)
     - Sxx_db (ndarray): Espectrograma en dB
     """
-    from scipy import signal as scipy_signal
-    
     if noverlap is None:
         noverlap = nperseg // 2
     

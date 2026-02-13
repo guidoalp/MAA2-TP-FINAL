@@ -16,9 +16,8 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🎵 Analizador Espectral con Filtros FIR")
+st.title("Analizador Espectral con Filtros FIR")
 st.markdown("**Trabajo Final - Matemática Aplicada al Arte Digital II**")
-st.markdown("---")
 
 st.sidebar.header("⚙️ Configuración")
 
@@ -125,13 +124,14 @@ if uploaded_file is not None:
             st.rerun()
 
 else:
+    st.markdown("---")
     st.info("👈 Por favor, subí un archivo de audio para comenzar")
     st.stop()
 
 # Si ya se analizó, muestro resultados
 if 'y_filtered' in st.session_state:
     st.markdown("---")
-    st.header("📊 Resultados del Análisis")
+    st.header("Resultados del Análisis")
     
     # Recuperar datos del session_state
     y = st.session_state.y
@@ -292,7 +292,7 @@ if 'y_filtered' in st.session_state:
         
         axes[1].set_xlabel('Frecuencia (Hz)')
         axes[1].set_ylabel('Atenuación (dB)')
-        axes[1].set_title('Diferencia espectral (lo que se atenuó)')
+        axes[1].set_title('Diferencia espectral (frecuencias atenuadas)')
         axes[1].legend()
         axes[1].grid(True, alpha=0.3)
         
@@ -405,4 +405,5 @@ if 'y_filtered' in st.session_state:
             use_container_width=True
         )
 else:
+    st.markdown("---")
     st.info("Presiona el botón 'Analizar' para ver los resultados")
