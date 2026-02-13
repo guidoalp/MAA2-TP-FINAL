@@ -4,9 +4,10 @@ import numpy as np
 import io
 from src.filters import lowpass_fir, highpass_fir, bandpass_fir, apply_filter
 from src.analysis import calculate_fft, calculate_filter_response, compute_spectrogram
-from src.visualization import (plot_filters_comparison, plot_audio_effects_comparison,
-                               plot_spectrograms_comparison)
+
 import matplotlib.pyplot as plt
+import soundfile as sf
+from io import BytesIO
 
 
 st.set_page_config(
@@ -157,6 +158,11 @@ if 'y_filtered' in st.session_state:
         
         with col1:
             st.markdown("**Original**")
+            buffer_orig = BytesIO()
+            sf.write(buffer_orig, y, sr, format='WAV')
+            buffer_orig.seek(0)
+            st.audio(buffer_orig, format='audio/wav')
+
             fig, ax = plt.subplots(figsize=(10, 3))
             tiempo = np.linspace(0, len(y)/sr, len(y))
             ax.plot(tiempo, y, linewidth=0.5)
@@ -169,6 +175,11 @@ if 'y_filtered' in st.session_state:
         
         with col2:
             st.markdown(f"**Filtrado - {filter_name}**")
+            buffer_filt = BytesIO()
+            sf.write(buffer_filt, y_filtered, sr, format='WAV')
+            buffer_filt.seek(0)
+            st.audio(buffer_filt, format='audio/wav')
+
             fig, ax = plt.subplots(figsize=(10, 3))
             ax.plot(tiempo, y_filtered, linewidth=0.5, color='orange')
             ax.set_xlabel('Tiempo (s)')
@@ -345,5 +356,53 @@ if 'y_filtered' in st.session_state:
         st.pyplot(fig)
         plt.close()
 
+    # ============================================
+    # DESCARGA
+    # ============================================
+    st.markdown("---")
+    st.header("💾 Descargar audios")
+
+    original_filename = uploaded_file.name.rsplit('.', 1)[0]
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Audio original**")
+        
+        # Preparar archivo para descarga
+        buffer_orig_download = BytesIO()
+        sf.write(buffer_orig_download, y, sr, format='WAV')
+        buffer_orig_download.seek(0)
+        
+        st.download_button(
+            label="Descargar original (.wav)",
+            data=buffer_orig_download,
+            file_name="audio_original.wav",
+            mime="audio/wav",
+            use_container_width=True
+        )
+    
+    with col2:
+        st.markdown(f"**Audio filtrado - {filter_name}**")
+        
+        # Preparar archivo para descarga
+        buffer_filt_download = BytesIO()
+        sf.write(buffer_filt_download, y_filtered, sr, format='WAV')
+        buffer_filt_download.seek(0)
+        
+        # Generar nombre de archivo descriptivo
+        if filter_type == "Paso banda":
+            filename = f"{original_filename}_{fc_low}-{fc_high}Hz.wav"
+        else:
+            filter_prefix = "lowpass" if filter_type == "Paso bajo" else "highpass"
+            filename = f"{original_filename}_{filter_prefix}_{fc}Hz.wav"
+        
+        st.download_button(
+            label="Descargar filtrado (.wav)",
+            data=buffer_filt_download,
+            file_name=filename,
+            mime="audio/wav",
+            use_container_width=True
+        )
 else:
     st.info("Presiona el botón 'Analizar' para ver los resultados")
