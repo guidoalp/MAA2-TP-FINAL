@@ -104,7 +104,11 @@ if uploaded_file is not None:
             else:
                 h = bandpass_fir(fc_low=fc_low, fc_high=fc_high, fs=sr, num_taps=num_taps)
                 filter_name = f"Paso banda ({fc_low}-{fc_high} Hz)"
-            
+
+            if h is None:
+                st.error("Error: la frecuencia inferior de corte debe ser menor a la frecuencia superior")
+                st.stop()
+
             y_filtered = apply_filter(y, h)
             
             # Guardar en session_state para usar después

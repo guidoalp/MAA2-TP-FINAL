@@ -97,7 +97,8 @@ def bandpass_fir(fc_low, fc_high, fs, num_taps=101, window_type='hamming'):
     """
     # validación de parametros
     if fc_low >= fc_high:
-        raise ValueError("fc_low debe ser menor que fc_high")
+        print("Error: fc_low debe ser menor que fc_high")
+        return None
     
     if num_taps % 2 == 0:
         num_taps += 1
